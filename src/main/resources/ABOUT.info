@@ -1,0 +1,5 @@
+This framework gives to a server the functionality to SEND push notifications using the Google C2DM 
+(Cloud to Device Messaging), available in Android for devices with version 2.2+.
+
+Created by JavocSoft (2011) on October.
+http://javocsoft.blogspot.com
