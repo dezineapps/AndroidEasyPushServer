@@ -1,0 +1,5 @@
+Created by JavocSoft 2011.
+Android EasyPushServer Library
+
+This library is intended to be able to provide the Google C2DM capabilities to a server. This is the
+server-side part. There is the android client-part called AndroidEasyPushClient.
