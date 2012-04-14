@@ -45,6 +45,7 @@ public class C2DMSrvClient {
 	private String c2dm_account_sender_pwd;
 	private String c2dm_token_file;
 	private String c2dm_serverName;
+	private String cd2m_temporalFolder;
 	
 	
 	/**
@@ -92,10 +93,11 @@ public class C2DMSrvClient {
 		String c2dm_auth_token=null;
 		
 		try {			
-			String tmpPath=prepareC2DMTempFolder(c2dm_temp_folder);
-						
-			File f=new File(tmpPath+c2dm_account_credentials_file);
-			File fSrvToken=new File(tmpPath+c2dm_token_file);
+			cd2m_temporalFolder=prepareC2DMTempFolder(c2dm_temp_folder);
+			
+			
+			File f=new File(cd2m_temporalFolder+c2dm_account_credentials_file);
+			File fSrvToken=new File(cd2m_temporalFolder+c2dm_token_file);
 			
 			//--CHECK/UPDATE CREDENTIALS--
 			//We create the secure store for credentials
@@ -230,7 +232,7 @@ public class C2DMSrvClient {
 			
 		try{
 			//Get the SRV token from the file.
-			File fSrvToken=new File(c2dm_token_file);
+			File fSrvToken=new File(cd2m_temporalFolder+c2dm_token_file);
 			FileInputStream inSrvToken=new FileInputStream(fSrvToken);
 			C2DMOperationInfo opResult=AndroidC2DM.readSavedServerToken(inSrvToken);
 			String srv_authentication_token=opResult.getC2DMSrvToken();
