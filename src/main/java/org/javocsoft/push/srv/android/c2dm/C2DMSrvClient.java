@@ -80,18 +80,22 @@ public class C2DMSrvClient {
 	/**
 	 * Allows to obtain an authorization token from C2DM
 	 * 	
-	 * @param update	If is set to TRUE a new authorization token will be get from Google,
-	 * 					otherwise the existing one will be used.
-	 * @param save		If TRUE the token is saved.
+	 * @param update			If is set to TRUE a new authorization token will be get from Google,
+	 * 							otherwise the existing one will be used.
+	 * @param save				If TRUE the token is saved.
+	 * @param c2dm_temp_folder	The specified folder will be used to store the credentials
+	 * 							and token files. If null, default java temporal folder is used.	
 	 * @return The C2DM authorization token.
 	 * @throws {@link C2DMClientGetAuthTokenException}
 	 */
-	public String getServerAuthenticationToken(boolean update, boolean save) throws C2DMClientGetAuthTokenException{
+	public String getServerAuthenticationToken(boolean update, boolean save, String c2dm_temp_folder) throws C2DMClientGetAuthTokenException{
 		String c2dm_auth_token=null;
 		
-		try {
-			File f=new File(c2dm_account_credentials_file);
-			File fSrvToken=new File(c2dm_token_file);
+		try {			
+			String tmpPath=prepareC2DMTempFolder(c2dm_temp_folder);
+						
+			File f=new File(tmpPath+c2dm_account_credentials_file);
+			File fSrvToken=new File(tmpPath+c2dm_token_file);
 			
 			//--CHECK/UPDATE CREDENTIALS--
 			//We create the secure store for credentials
@@ -106,6 +110,7 @@ public class C2DMSrvClient {
 				secStore.saveSecureStore(outSecStore, new C2DMSenderCredentials(c2dm_account_sender,c2dm_account_sender_pwd));
 				outSecStore.close();
 				isSecureStorageNew=true;
+				System.out.println("Credentials Secure Store saved to: '"+f.getAbsolutePath()+"'");
 			}
 			
 			//We read the secure store for credentials
@@ -126,6 +131,7 @@ public class C2DMSrvClient {
 				credentials=secStore.openSecureStore(in);
 				in.close();
 				credentialsUpdated=true;
+				System.out.println("Credentials Secure Store updated in: '"+f.getAbsolutePath()+"'");
 			}
 			
 			//--GET C2DM Authorization TOKEN --
@@ -347,6 +353,8 @@ public class C2DMSrvClient {
 	}
 	
 	
+	
+	
 	//AUXILIAR FUNCTIONS
 	
 	/*
@@ -397,6 +405,7 @@ public class C2DMSrvClient {
 			FileOutputStream outSrvToken=new FileOutputStream(fSrvToken);
 			result = AndroidC2DM.obtainC2DMAuthenticationToken(c2dm_serverName,credentials,save?outSrvToken:null);
 			outSrvToken.close();
+			System.out.println("C2DM Server Token saved to: '"+fSrvToken.getAbsolutePath()+"'");
 		}else{
 			result = AndroidC2DM.obtainC2DMAuthenticationToken(c2dm_serverName,credentials,null);
 		}
@@ -415,4 +424,54 @@ public class C2DMSrvClient {
 		
 		return c2dm_auth_token.trim();
 	}
+
+	
+	public static final String JAVA_SEPARATOR=System.getProperty("file.separator");
+	public static final String JAVA_TEMP_DIR=System.getProperty("java.io.tmpdir");
+	public static final String C2DM_TEMP_DIR="c2dm";
+	
+	/*
+	 * Prepares the folder where temporal data will be stored. If the folder 
+	 * does not exists it will try to create it.
+	 * 
+	 * @param path	Path to the temporal folder. If null, java.io.tmpdir will be used.
+	 * @return	The path to the temporal folder.
+	 * @throws IOException in case of error.
+	 */
+	private static String prepareC2DMTempFolder(String path) throws IOException{
+		StringBuffer pathToSave=new StringBuffer();
+		
+		if(path==null){
+			pathToSave.append(JAVA_TEMP_DIR);
+			if(!pathToSave.toString().endsWith(JAVA_SEPARATOR)){
+				//AWS seems to not add the final slash to the temporal path. For this case.
+				pathToSave.append(JAVA_SEPARATOR);
+			}
+			pathToSave.append(C2DM_TEMP_DIR);
+		}else{
+			pathToSave.append(path);
+			if(path.endsWith(JAVA_SEPARATOR)){
+				if(!path.endsWith( (C2DM_TEMP_DIR+JAVA_SEPARATOR) )){
+					pathToSave.append(C2DM_TEMP_DIR);
+				}
+			}else{
+				if(!path.endsWith( C2DM_TEMP_DIR )){
+					pathToSave.append(JAVA_SEPARATOR).append(C2DM_TEMP_DIR);
+				}
+			}
+		}
+		
+		if(!new File(pathToSave.toString()).exists()){
+			boolean res=new File(pathToSave.toString()).mkdir();
+			if(!res){
+				throw new IOException("ERROR: C2DM temporal folder '"+pathToSave+"' could not be created.");
+			}
+		}
+		
+		if(!pathToSave.toString().endsWith(JAVA_SEPARATOR)){
+			pathToSave.append(JAVA_SEPARATOR);
+		}
+		return pathToSave.toString();
+	}
+
 }

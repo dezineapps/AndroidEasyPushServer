@@ -49,3 +49,8 @@ SendPush, this will reproduce, with more details, the process done in the librar
 TestC2DMClient, This will test the C2DM client.
 
 URL of testServer: http://localhost:8080/AndroidPushServer/
+
+IMPORTANT:
+----------
+When running the server from localhost do not use Eclipse, use an external server because if not, the emulator
+is not able to connect with it.

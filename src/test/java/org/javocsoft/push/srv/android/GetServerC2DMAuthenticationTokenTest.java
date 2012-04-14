@@ -26,8 +26,8 @@ public class GetServerC2DMAuthenticationTokenTest
 {
 	
 	final String c2dm_account_credentials_file="c2dm_account_credentials.c2dm";
-	final String c2dm_account_sender="javocsoft";
-	final String c2dm_account_sender_pwd="5676jgsneo";
+	final String c2dm_account_sender="";
+	final String c2dm_account_sender_pwd="";
 	final String c2dm_token_file="c2dm_srv_token.c2dm";
 	final String c2dm_serverName="Test Server";
 	

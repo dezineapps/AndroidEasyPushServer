@@ -84,7 +84,7 @@ public class C2DMClientTest {
 			if(!tokenNotPersist){
 				//Way 1: With token being saved in disk.
 				//...get the C2DM authorization token for this app.
-				c2dmClient.getServerAuthenticationToken(false, true);
+				c2dmClient.getServerAuthenticationToken(false, true, null);
 				//...and send a push to the specified devices.				
 				result=c2dmClient.sendPush(devices, "This is a push test from JavocSoft - AndroidEasyPushServer library.",richMediaPushUrl,notificationId,true,true);
 				//We check de result (push sent information)
@@ -96,7 +96,7 @@ public class C2DMClientTest {
 			}else{
 				//Way 2: With token not being saved in disk.
 				//...get the C2DM authorization token for this app.
-				String c2dmToken=c2dmClient.getServerAuthenticationToken(false, false);
+				String c2dmToken=c2dmClient.getServerAuthenticationToken(false, false, null);
 				//...and send a push to the specified devices.				
 				result=c2dmClient.sendPush(c2dmToken,devices, "This is a push test from JavocSoft - AndroidEasyPushServer library.",richMediaPushUrl,notificationId,true,true);
 				//We check de result (push sent information)
