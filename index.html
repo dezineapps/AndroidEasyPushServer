@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="JavocSoft Android Easy Push Server : A library to allow the easy usage of Google C2DM service in the server side." />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>JavocSoft Android Easy Push Server</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/javocsoft/AndroidEasyPushServer">Fork Me on GitHub</a>
+
+          <h1 id="project_title">JavocSoft Android Easy Push Server</h1>
+          <h2 id="project_tagline">A library to allow the easy usage of Google C2DM service in the server side.</h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/javocsoft/AndroidEasyPushServer/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/javocsoft/AndroidEasyPushServer/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>Welcome to Android Easy Push Server Library.</h2>
+
+<p>This library is intented to make easy the usage of Google C2DM Push Notification system from a Java application. </p>
+
+<h2>Usage.</h2>
+
+<h3>Registration with C2DM</h3>
+
+<p>Is quite easy. First you must initialize de server by declaring some variables:</p>
+
+<p>Set your Google C2DM credentials. To obtain these credentials go to <a href="http://code.google.com/intl/es-ES/android/c2dm/signup.html">Google C2DM Registration Page</a>.</p>
+
+<pre><code>final String c2dm_account_sender="";
+final String c2dm_account_sender_pwd="";
+</code></pre>
+
+<p>Set the credentials file name and a password for it. This file will hold (encrypted, PBE) your credentials for Google C2DM.</p>
+
+<pre><code>final String c2dm_secure_store_pwd="password";
+final String c2dm_account_credentials_file="c2dm_account_credentials.c2dm";
+</code></pre>
+
+<p>Set also your server name, this info will be sent to Google C2DM when getting your server token.</p>
+
+<pre><code>final String c2dm_serverName="YourServerName";
+</code></pre>
+
+<p>Set the file that will contain the obtained Google C2DM token for your server.</p>
+
+<pre><code>final String c2dm_token_file="c2dm_srv_token.c2dm";
+</code></pre>
+
+<p>Now, to register your server with Google C2DM you only have to create a C2DMSrvClient object and call to a method:</p>
+
+<pre><code>private C2DMSrvClient c2dmClient=null;
+private String c2dmToken=null;
+
+c2dmClient=new C2DMSrvClient(c2dm_secure_store_pwd, c2dm_account_credentials_file, 
+                     c2dm_token_file, c2dm_account_sender, 
+                 c2dm_account_sender_pwd,c2dm_serverName);
+try{
+    //Way 1: With token being saved in disk.
+    c2dmToken=c2dmClient.getServerAuthenticationToken(false, true, null);
+    logger.info("Server C2DM AUTH obtained token: "+c2dmToken);
+} catch (C2DMClientGetAuthTokenException e) {
+    logger.error("ERROR Server C2DM AUTH obtain token process: "+e.getMessage());
+}
+</code></pre>
+
+<p>There are two ways of initialization related to how the token is managed:
+* Save the obtained token in disk (variable "c2dm_token_file")</p>
+
+<pre><code>c2dmToken=c2dmClient.getServerAuthenticationToken(false, true);
+</code></pre>
+
+<ul>
+<li>Not saving the obtained token in disk.</li>
+</ul><p>In this case, the token is only saved in memory.</p>
+
+<pre><code>c2dmToken=c2dmClient.getServerAuthenticationToken(false, true);
+</code></pre>
+
+<p>If all went ok, now your server is able to send push notification :)</p>
+
+<h2>Sending a PUSH</h2>
+
+<p>First, we need to have some devices registered in our server to be able to send a message (see <a href="https://github.com/javocsoft/AndroidEasyPushClient">JavocSoft AndroidEasyPushClient</a> to get a device registered with C2DM) . We also set a notification id for later ACK optional usage (statistics pourposes). It is possible also to send some rich media info, in this case, a URL.</p>
+
+<pre><code>final String notificationId="1";        
+String dev_reg_id="some_device_registration_id";
+String[] devices={"dev_reg_id1","dev_reg_id2"};
+String richMediaPushUrl="<a href="http://www.google.es">http://www.google.es</a>";
+</code></pre>
+
+<p>Now, to send the notification, there are two ways dependig of the initialization type:</p>
+
+<h3>With token saved on disk</h3>
+
+<pre><code>try {
+  C2DMOperationInfo result=c2dmClient.sendPush(devices, "This is a push test from JavocSoft - AndroidEasyPushServer  
+                                             library.",richMediaPushUrl,notificationId,true,false);
+  String[] pushSent=result.getC2DMSentPushNotifications();
+  for(String pushData:pushSent){
+    System.out.println("PUSH Info: "+pushData);
+  }
+} catch (C2DMClientGetAuthTokenException e) {
+    e.printStackTrace();
+} catch (C2DMClientPushException e) {
+    e.printStackTrace();
+}
+</code></pre>
+
+<h3>With token not saved on disk</h3>
+
+<pre><code>try {
+  String c2dmToken=c2dmClient.getServerAuthenticationToken(false, false);
+  C2DMOperationInfo result=c2dmClient.sendPush(c2dmToken, devices, "This is a push test from JavocSoft -  
+                                             AndroidEasyPushServer library.",
+                                             richMediaPushUrl,notificationId,true,false);
+  String[] pushSent=result.getC2DMSentPushNotifications();
+  for(String pushData:pushSent){
+    System.out.println("PUSH Info: "+pushData);
+  }
+} catch (C2DMClientGetAuthTokenException e) {
+    e.printStackTrace();
+} catch (C2DMClientPushException e) {
+    e.printStackTrace();
+}
+</code></pre>
+
+<p>As you can see, in both cases the result of the operation is saved in a C2DMOperationInfo object.</p>
+
+<h2>Acknowledge of read sent PUSH Notification</h2>
+
+<p>This library also is prepared to receive ACKs from the client side (Android device) when the user opens a sent PUSH notification allowing in the server side statistics usage of this info.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">JavocSoft Android Easy Push Server maintained by <a href="https://github.com/javocsoft">javocsoft</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
